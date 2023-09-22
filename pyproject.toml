@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "message-bus"
+version = "0.1.0"
+description = "A simple message bus that handles command and event handlers"
+authors = ["mauudev <mtrigo143@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+logzero = "^1.7.0"
+kombu = "^5.3.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
