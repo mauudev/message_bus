@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    container_name: sb_rabbitmq
+    hostname: sb_rabbitmq
+    image: rabbitmq:3.9.7-management
+    restart: always
+    ports:
+      - 5000:5672
+      - 5001:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq:rw
+      - rabbitmq_logs:/var/log/rabbitmq:rw
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    networks:
+      - message_bus_net
+
+volumes:
+  rabbitmq_data:
+  rabbitmq_logs:
+
+networks:
+  message_bus_net:
+    name: message_bus_net
