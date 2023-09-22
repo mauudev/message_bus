@@ -1,30 +1,31 @@
 from threading import Thread
-from typing import Any, List, Type
+from typing import Any, Callable, List, Type
 
 from kombu import Connection, Consumer
 from kombu.mixins import ConsumerMixin
 
 from src.logger import logger
 
-from .handlers import message_handler
-
 
 class RabbitMQConsumer(ConsumerMixin):
-    def __init__(self, conn: Connection):
+    def __init__(self, conn: Connection, message_handler: Callable):
         self.connection = conn
         self._thread = Thread(target=self.run)
-        # self.message_handler = message_handler
-        self._handler = message_handler
+        self._message_handler = message_handler
 
     def get_consumers(self, consumer: Type[Consumer], queues: List[Any]) -> Any:
         return [
             consumer(
                 queues=queues,
-                callbacks=[self._handler],
+                callbacks=[self.on_message],
                 accept=["json"],
                 auto_declare=True,
             )
         ]
+
+    def on_message(self, body, message):
+        self._message_handler(body)
+        message.ack()
 
     def handle_message(self, body, message):
         try:

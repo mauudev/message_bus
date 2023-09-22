@@ -114,5 +114,5 @@ class Transport(ABC):
         ...
 
     @abstractmethod
-    def consume(self, queue_name: str, callback: Callable) -> None:
+    def on_message(self, message: Any) -> None:
         ...

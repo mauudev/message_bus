@@ -3,6 +3,7 @@ from typing import Any, Callable, Dict, List
 from kombu import Connection, Exchange, Queue
 
 from src.core.base_abstractions import Transport
+from src.logger import logger
 from src.transport.rabbitmq import RabbitMQConsumer, RabbitMQProducer, message_handler
 
 
@@ -22,16 +23,23 @@ class RabbitMQTransport(Transport):
         _queue_options = queue_options
         _initialized = False
         _connection = None
+        _declared_queues = None
         producer = None
         consumer = None
 
     def initialize(self) -> None:
-        if not self._initialized:
-            self._connection = Connection(self._amqp_uri)
-            self.producer = RabbitMQProducer(self._connection)
-            self.consumer = RabbitMQConsumer(self._connection)
+        try:
+            if not self._initialized:
+                self._connection = Connection(self._amqp_uri)
+                self.producer = RabbitMQProducer(self._connection)
+                self.consumer = RabbitMQConsumer(self._connection, self.on_message)
 
-            self._initialized = True
+                self.declare_exchange(self._exchange, self._exchange_type)
+                self._declared_queues = self.declare_queues()
+
+                self._initialized = True
+        except Exception as e:
+            logger.error(f"Error during transport initialization: {e}")
 
     def declare_exchange(self, exchange: str, type_: str = "direct"):
         with self._connection.channel() as channel:
@@ -78,5 +86,5 @@ class RabbitMQTransport(Transport):
             routing_key,
         )
 
-    def consume(self, queue_name: str, callback: Callable[..., Any]) -> None:
-        return self..consume(queue_name, callback)
+    def on_message(self, body: Any) -> None:
+        message_handler(body)
