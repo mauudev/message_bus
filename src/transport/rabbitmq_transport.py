@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List
+from typing import Any, Dict
 
 from kombu import Connection, Exchange, Queue
 
@@ -8,6 +8,37 @@ from src.transport.rabbitmq import RabbitMQConsumer, RabbitMQProducer, message_h
 
 
 class RabbitMQTransport(Transport):
+    """
+    Initializes a RabbitMQ transport with the provided parameters.
+
+    Args:
+        amqp_uri (str): The URI of the RabbitMQ server.
+        exchange (str): The name of the exchange to use.
+        exchange_type (str): The type of the exchange.
+        queues (Dict[str, str]): A dictionary mapping queue names to routing keys.
+        queue_options (Dict[str, Any]): A dictionary of additional options for the queues.
+
+    Example:
+        ```python
+        amqp_uri = "amqp://guest:guest@localhost:5672/"
+        exchange = "my_exchange"
+        exchange_type = "direct"
+        queues = {
+            "queue1": "routing_key1",
+            "queue2": "routing_key2",
+        }
+        queue_options = {
+            "queue1": {
+                "durable": True,
+            },
+            "queue2": {
+                "durable": False,
+            },
+        }
+
+        transport = RabbitMQTransport(amqp_uri, exchange, exchange_type, queues, queue_options)
+        ```"""
+
     def __init__(
         self,
         amqp_uri: str,
@@ -74,7 +105,9 @@ class RabbitMQTransport(Transport):
                     exchange=self._exchange,
                     routing_key=routing_key,
                     channel=channel,
-                    **self._queue_options,
+                    **self._queue_options[queue_name]
+                    if queue_name in self._queue_options
+                    else {},
                 )
                 queue.declare()
                 queues.append(queue)
