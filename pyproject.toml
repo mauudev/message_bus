@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.11"
 logzero = "^1.7.0"
 kombu = "^5.3.2"
+python-dotenv = "^1.0.0"
 
 
 [build-system]
