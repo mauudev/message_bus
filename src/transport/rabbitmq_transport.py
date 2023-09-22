@@ -54,7 +54,8 @@ class RabbitMQTransport(Transport):
         _queue_options = queue_options
         _initialized = False
         _connection = None
-        _declared_queues = None
+        _declared_queues = []
+        _declared_exchange = None
         producer = None
         consumer = None
 
@@ -74,13 +75,12 @@ class RabbitMQTransport(Transport):
 
     def declare_exchange(self, exchange: str, type_: str = "direct"):
         with self._connection.channel() as channel:
-            exchange = Exchange(
+            self._declared_exchange = Exchange(
                 name=exchange,
                 type=type_,
                 channel=channel,
             )
-            exchange.declare()
-            return exchange
+            self._declared_exchange.declare()
 
     def declare_queue(
         self, queue_name: str, exchange: str, routing_key: str, options: dict
@@ -94,10 +94,9 @@ class RabbitMQTransport(Transport):
                 **options,
             )
             queue.declare()
-            return queue
+            self._declared_queues.append(queue)
 
     def declare_queues(self):
-        queues = []
         with self._connection.channel() as channel:
             for queue_name, routing_key in self._queues.items():
                 queue = Queue(
@@ -110,8 +109,7 @@ class RabbitMQTransport(Transport):
                     else {},
                 )
                 queue.declare()
-                queues.append(queue)
-        return queues
+                self._declared_queues.append(queue)
 
     def publish(self, routing_key: str, message: Any):
         self.producer.push_message(
