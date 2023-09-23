@@ -1,6 +1,6 @@
 # Message Bus
 
-A simple Python library that provides an implementation of a message bus. It allows you to register handlers and dependencies and execute them based on incoming messages simulating communication under CQRS + Event Driven architectures.
+A simple Python library that provides an implementation of a message bus. It allows you to register commands, events, handlers, their dependencies and execute them based on incoming messages simulating communication under CQRS + Event Driven architectures.
 
 ## Features
 
