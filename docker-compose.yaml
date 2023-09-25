@@ -1,6 +1,21 @@
 version: "3.9"
 
 services:
+  oracle-db:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    container_name: oracle-container
+    environment:
+      - ORACLE_SID=ORCL
+      - ORACLE_PDB=ORCLPDB1
+      - ORACLE_PWD=tucontraseña  # Cambia por la contraseña que desees
+    ports:
+      - "1521:1521"  # Puerto para Oracle Database
+      - "5500:5500"  # Puerto para Oracle Enterprise Manager
+    volumes:
+      - ./data:/opt/oracle/oradata  # Monta un volumen para los datos de Oracle
+      - ./scripts:/docker-entrypoint-initdb.d  # Monta un volumen para scripts de inicio
+    networks:
+      - message_bus_net
   rabbitmq:
     container_name: sb_rabbitmq
     hostname: sb_rabbitmq
